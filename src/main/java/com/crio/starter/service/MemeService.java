@@ -100,7 +100,7 @@ public class MemeService {
         log.info("Found {} memes", memes.size());
         
         return memes.stream()
-                . map(meme -> modelMapper.map(meme, MemeResponse.class))
+                .map(meme -> modelMapper.map(meme, MemeResponse.class))
                 .collect(Collectors. toList());
     }
     

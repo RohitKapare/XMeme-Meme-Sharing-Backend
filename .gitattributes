@@ -3,3 +3,9 @@
 **/target/** linguist-generated=true
 **/build/** linguist-generated=true
 **/docs/** linguist-generated=true
+
+/gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+python_lib/* linguist-vendored
+*.py linguist-vendored

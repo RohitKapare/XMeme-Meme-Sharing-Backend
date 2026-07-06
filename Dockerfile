@@ -1,19 +1,14 @@
-FROM gradle:jdk11-focal
+# Stage 1: Build the application
+FROM gradle:7.4.2-jdk11-alpine AS build
+WORKDIR /app
+COPY build.gradle settings.gradle /app/
+COPY config /app/config
+COPY src /app/src
+RUN gradle clean build -x test -x checkstyleMain -x checkstyleTest
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update
-RUN apt-get -y install git redis-server wget gnupg
-
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
-RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-RUN apt-get update
-RUN apt-get install -y mongodb-org
-
-USER root
-
-RUN mkdir code
-COPY . /code
-
-RUN cd /code && chmod +x gradlew && ./gradlew bootjar
-
-CMD /code/start.sh
+# Stage 2: Create the final image
+FROM eclipse-temurin:11-jre-alpine
+WORKDIR /app
+EXPOSE 8081
+COPY --from=build /tmp/external_build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

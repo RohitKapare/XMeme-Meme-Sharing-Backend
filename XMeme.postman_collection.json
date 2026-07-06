@@ -1,0 +1,560 @@
+{
+  "info": {
+    "_postman_id": "190f3c43-cd3f-4080-a278-a3437f0977c6",
+    "name": "XMeme API Collection",
+    "description": "Complete Postman collection for testing the XMeme - Meme Sharing Backend REST API.\n\nBase URL: http://localhost:8081\n\n## Features:\n- POST a meme: creates a new entry and returns its unique ID\n- GET latest 100 memes: sorted by creation date (newest first)\n- GET a single meme by ID\n- PATCH a meme: update URL and/or caption (name is immutable)\n- DELETE a meme by ID\n\n## Testing Order:\n1. Create memes (valid and invalid scenarios)\n2. Browse all memes\n3. Get specific meme by ID\n4. Update meme details\n5. Delete memes\n6. Test error scenarios (404, 409, 400)\n\n## Tech Stack:\n- Spring Boot 2.7.1\n- MongoDB 6.0\n- Spring Data MongoDB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12884920"
+  },
+  "item": [
+    {
+      "name": "Create Memes",
+      "item": [
+        {
+          "name": "Create Meme 1 - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"memeId1\", jsonData.id);",
+                  "    pm.test(\"Meme created successfully\", function () {",
+                  "        pm.response.to.have.status(201);",
+                  "    });",
+                  "    pm.test(\"Response has id\", function () {",
+                  "        pm.expect(jsonData.id).to.not.be.undefined;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Alice Johnson\",\n    \"url\": \"https://example.com/meme1.jpg\",\n    \"caption\": \"When the build finally passes after 10 attempts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Creates a new meme with valid data. Returns 201 Created with the meme ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Meme 2 - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"memeId2\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Bob Smith\",\n    \"url\": \"https://example.com/meme2.jpg\",\n    \"caption\": \"Debugging at 2 AM be like...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Creates another meme with different data."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Meme 3 - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"memeId3\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Charlie Brown\",\n    \"url\": \"https://example.com/meme3.jpg\",\n    \"caption\": \"When your code works on the first try\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Creates a third meme for testing purposes."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Duplicate Meme - 409 Conflict",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Alice Johnson\",\n    \"url\": \"https://example.com/meme1.jpg\",\n    \"caption\": \"When the build finally passes after 10 attempts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Attempts to create a duplicate meme (same name, url, and caption). Should return 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Meme - Missing Name - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://example.com/meme-missing-name.jpg\",\n    \"caption\": \"This should fail validation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Attempts to create a meme without a name field. Should return 400 Bad Request."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Meme - Empty Caption - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Empty Caption User\",\n    \"url\": \"https://example.com/empty-caption.jpg\",\n    \"caption\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Attempts to create a meme with an empty caption. Should return 400 Bad Request."
+          },
+          "response": []
+        }
+      ],
+      "description": "Test cases for creating memes, including success scenarios and various validation failures."
+    },
+    {
+      "name": "Browse Memes",
+      "item": [
+        {
+          "name": "Get All Memes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes"
+              ]
+            },
+            "description": "Test case for when database is empty. Should return 200 OK with an empty array."
+          },
+          "response": []
+        }
+      ],
+      "description": "Test cases for browsing/listing memes."
+    },
+    {
+      "name": "Get Meme by ID",
+      "item": [
+        {
+          "name": "Get Meme by ID - Success",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId1}}"
+              ]
+            },
+            "description": "Retrieves a specific meme by its ID. Returns 200 OK with meme details."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Meme by Invalid ID - 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/64a1f3c2e4b0a23d5f999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "64a1f3c2e4b0a23d5f999999"
+              ]
+            },
+            "description": "Attempts to retrieve a meme with a non-existent ID. Should return 404 Not Found."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Meme by Malformed ID - 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/invalid-id-format",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "invalid-id-format"
+              ]
+            },
+            "description": "Attempts to retrieve a meme with a malformed ID. Should return 404 Not Found or 400 Bad Request."
+          },
+          "response": []
+        }
+      ],
+      "description": "Test cases for retrieving individual memes by ID."
+    },
+    {
+      "name": "Update Memes",
+      "item": [
+        {
+          "name": "Update Meme - URL Only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://example.com/updated-meme1.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId1}}"
+              ]
+            },
+            "description": "Updates only the URL of an existing meme. Name is immutable."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Meme - Caption Only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"caption\": \"Updated caption: Still celebrating that successful build!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId1}}"
+              ]
+            },
+            "description": "Updates only the caption of an existing meme."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Meme - Both URL and Caption",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://example.com/final-updated-meme1.jpg\",\n    \"caption\": \"Completely revamped meme with new image and caption\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId2}}"
+              ]
+            },
+            "description": "Updates both URL and caption of an existing meme."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Non-Existent Meme - 404",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://example.com/nonexistent.jpg\",\n    \"caption\": \"This meme doesn't exist\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/memes/64a1f3c2e4b0a23d5f999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "64a1f3c2e4b0a23d5f999999"
+              ]
+            },
+            "description": "Attempts to update a meme that doesn't exist. Should return 404 Not Found."
+          },
+          "response": []
+        }
+      ],
+      "description": "Test cases for updating existing memes. Only URL and caption can be updated; name is immutable."
+    },
+    {
+      "name": "Delete Memes",
+      "item": [
+        {
+          "name": "Delete Meme - Success",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId3}}"
+              ]
+            },
+            "description": "Deletes a meme by its ID. Returns 204 No Content on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Non-Existent Meme - 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/64a1f3c2e4b0a23d5f999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "64a1f3c2e4b0a23d5f999999"
+              ]
+            },
+            "description": "Attempts to delete a meme that doesn't exist. Should return 404 Not Found."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Meme - Malformed ID - 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/invalid-id-format",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "invalid-id-format"
+              ]
+            },
+            "description": "Attempts to delete a meme with a malformed ID. Should return 404 Not Found or 400 Bad Request."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Deletion - Get Deleted Meme",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/memes/{{memeId3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "memes",
+                "{{memeId3}}"
+              ]
+            },
+            "description": "Attempts to retrieve a deleted meme. Should return 404 Not Found."
+          },
+          "response": []
+        }
+      ],
+      "description": "Test cases for deleting memes."
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger-ui.html",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "swagger-ui.html"
+              ]
+            },
+            "description": "Access the Swagger UI for interactive API documentation."
+          },
+          "response": []
+        }
+      ],
+      "description": "Basic health check endpoints."
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "memeId1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memeId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memeId3",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

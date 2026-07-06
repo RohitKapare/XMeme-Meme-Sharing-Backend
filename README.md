@@ -4,6 +4,49 @@ A RESTful backend web application where users can post, browse, update, and dele
 
 ---
 
+
+## 🐳 Running with Docker (Quick Start)
+
+- Multi-stage docker build with docker-compose to orchestrate multi-container environment.
+- Health monitoring to check dependencies are loaded before starting project container.
+- Network is isolated to avoid conflicts with local ports.
+
+### Prerequisites
+* Ensure [Docker](https://www.docker.com/get-started) and Docker Compose are installed and running.
+
+### Setup & Execution
+
+**1. Clone the repository and cd into root folder.**
+```bash
+git clone https://github.com/RohitKapare/XMeme-Meme-Sharing-Backend.git
+cd XMeme-Meme-Sharing-Backend
+```
+**2. Build and launch container in detached mode**
+```bash
+docker compose up --build -d
+```
+> API will listen on **`http://localhost:8081`**.
+> [!IMPORTANT]
+> **Open the Swagger UI at: http://localhost:8081/swagger-ui.html**
+
+**3. Testing the endpoints:**
+Import [XMeme.postman_collection.json](./XMeme.postman_collection.json) in postman to test endpoints.
+
+**4. Cleanup:**
+
+Standard Reset (Stops containers and wipes the localized database volume cleanly):
+```bash
+docker compose down -v
+```
+Deep Clean (Wipes the volume _and_ purges the locally built custom application image):
+```bash
+docker compose down -v --rmi local
+```
+
+
+---
+
+
 ## What the Project Does
 
 XMeme is a simple backend service that lets users:

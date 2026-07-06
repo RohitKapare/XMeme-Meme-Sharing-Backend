@@ -53,15 +53,15 @@ allprojects {
 spotbugsMain {
     ignoreFailures = true
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml { enabled = false }
+        html { enabled = true }
     }
 }
 spotbugsTest {
     ignoreFailures = true
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml { enabled = false }
+        html { enabled = true }
     }
 }
 
@@ -71,8 +71,8 @@ jacoco {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        csv.enabled false
+        xml { enabled = true }
+        csv { enabled = false }
     }
 }
 
